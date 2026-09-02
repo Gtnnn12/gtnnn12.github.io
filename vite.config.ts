@@ -9,36 +9,45 @@ import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 // ---------------------------------------------------------------------------
 // Static export for GitHub Pages
 // ---------------------------------------------------------------------------
-// The Lovable sandbox always builds for Cloudflare (the nitro preset is forced
-// there), so this static config is a no-op in the sandbox and only takes
-// effect when you build locally or in CI with STATIC_EXPORT=true.
+// STATIC_EXPORT=true (set by `bun run build:static`) turns the TanStack Start
+// build into a pure static export:
 //
-// GitHub Pages project sites are served from https://<user>.github.io/<repo>/,
-// so every asset URL must be prefixed with /<repo>/. Set GHP_BASE to that
-// prefix (e.g. "/my-repo/") when building. Defaults to "/" for user/org pages
-// or a custom domain.
+//   - nitro is disabled. Running it alongside TanStack Start's own export
+//     conflicts: both want to own `dist/server`, and TanStack's perfect-prerender
+//     preview server can't import `dist/server/server.js` because nitro replaces
+//     it with `dist/server/index.mjs`. Disabling nitro lets TanStack Start emit
+//     its own server bundle (`dist/server/server.js`) so prerendering can run.
+//   - The three routes are prerendered to real HTML files in `dist/client`
+//     (`index.html`, `plugins/index.html`, `vertex/index.html`) so every page
+//     works for direct navigation on GitHub Pages with no server involved.
+//
+// GitHub Pages user sites (https://<user>.github.io/) are served from the root,
+// so the base is "/" by default. Set GHP_BASE (e.g. "/my-repo/") for a project
+// site or custom domain.
+//
+// Outside STATIC_EXPORT the config keeps the standard Lovable build (nitro →
+// cloudflare-module) untouched.
 // ---------------------------------------------------------------------------
 const staticExport = process.env["STATIC_EXPORT"] === "true";
 const base = process.env["GHP_BASE"] ?? "/";
 
 export default defineConfig({
+  ...(staticExport ? { nitro: false } : {}),
   tanstackStart: {
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
-    // nitro/vite builds from this
     server: { entry: "server" },
+    ...(staticExport
+      ? {
+          prerender: {
+            enabled: true,
+            crawlLinks: false,
+            failOnError: true,
+          },
+          pages: [{ path: "/" }, { path: "/plugins" }, { path: "/vertex" }],
+        }
+      : {}),
   },
   vite: {
     base,
   },
-  ...(staticExport
-    ? {
-        // `prerender` is a valid nitro option at runtime but not part of the
-        // narrow type exposed by @lovable.dev/vite-tanstack-config, hence the cast.
-        nitro: {
-          preset: "static",
-          output: { dir: "dist" },
-          prerender: { crawlLinks: true, routes: ["/"] },
-        } as never,
-      }
-    : {}),
 });

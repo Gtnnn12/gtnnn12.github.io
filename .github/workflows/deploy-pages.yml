@@ -26,16 +26,19 @@ jobs:
 
       - run: bun install --frozen-lockfile
 
-      # Static export. GitHub Pages project sites live under
-      # https://<user>.github.io/<repo>/, so assets must be prefixed with
-      # /<repo>/. For a user/org page or custom domain, set GHP_BASE="/" instead.
+      # Static export. This repo is a GitHub Pages USER site
+      # (https://gtnn12.github.io/), which is served from the root — assets must
+      # use base "/" (no /<repo>/ prefix).
       - run: bun run build:static
         env:
-          GHP_BASE: /${{ github.event.repository.name }}/
+          GHP_BASE: "/"
 
+      # TanStack Start's static export writes index.html and the assets into
+      # dist/client. Publish exactly that directory so index.html sits at the
+      # root of the Pages artifact.
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          path: dist/client
 
   deploy:
     needs: build
