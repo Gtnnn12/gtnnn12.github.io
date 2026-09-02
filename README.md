@@ -1,29 +1,37 @@
-# Welcome to your Lovable project
+# Gtnn — Portafolio
 
-This project was built with [Lovable](https://lovable.dev).
+Portafolio personal de Gtnn: desarrollador de software enfocado en seguridad, plugins y herramientas para comunidades digitales. Creador de NexCord y Vertex.
 
-## Build with Lovable
+Created by Gtnn12.
 
-Open your project in the [Lovable editor](https://lovable.dev) and keep building.
+## Rutas
 
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: connect the project to GitHub and every change made in Lovable is committed straight to your repository.
-- **Full ownership**: this code is yours. Push to your repository and your changes sync back into Lovable, ready for your next prompt.
+- `/` — Portafolio
+- `/plugins` — Catálogo de plugins de NexCord
+- `/vertex` — Vertex, alternativa gratuita a Discord y TeamSpeak
 
-## Development
-
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
-
-```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
-npm run dev
-```
-
-## Built with
+## Stack
 
 - TanStack Start
+- TanStack Router
+- React 19
 - TypeScript
-- React
 - Tailwind CSS
+- Vite
+
+## Desarrollo local
+
+Requiere [Bun](https://bun.sh).
+
+```sh
+bun install
+bun run dev
+```
+
+## Build estático (GitHub Pages)
+
+```sh
+bun run build:static
+```
+
+El resultado se genera en `dist/client` con `index.html` en la raíz. El workflow `.github/workflows/deploy-pages.yml` compila y publica el sitio automáticamente en cada push a `main`.
